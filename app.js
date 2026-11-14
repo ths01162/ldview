@@ -491,22 +491,11 @@
       .map((clip) => {
         const globalRank = rankMap.get(clip.clipUID) || '-';
         const isPlaying = clip.clipUID === state.activeClipUID;
-        const { tags } = classifyClip(clip);
         const dateShort = (clip.createdDate || '').split(' ')[0] || '-';
 
         const thumbHtml = clip.thumbnailImageUrl
           ? `<img src="${escapeHtml(clip.thumbnailImageUrl)}" alt="${escapeHtml(clip.clipTitle)}" loading="lazy" />`
           : `<div class="thumb-fallback"><span>🐾</span><small>${escapeHtml(clip.clipTitle)}</small></div>`;
-
-        const tagsHtml = tags
-          .slice(0, 2)
-          .map(
-            (t) =>
-              `<span class="tag-badge ${t.type === 'hot' ? 'tag-hot' : t.type === 'chzzk' ? 'tag-chzzk' : ''}">${escapeHtml(
-                t.label
-              )}</span>`
-          )
-          .join('');
 
         return `
           <article class="clip-card ${isPlaying ? 'now-playing' : ''}" data-clip-uid="${escapeHtml(clip.clipUID)}">
@@ -520,7 +509,6 @@
             </div>
             <div class="clip-card-body">
               <div>
-                <div class="clip-tags-row">${tagsHtml}</div>
                 <h3 class="clip-card-title" data-action="play" data-clip-uid="${escapeHtml(clip.clipUID)}">
                   ${escapeHtml(clip.clipTitle)}
                 </h3>
@@ -560,11 +548,10 @@
     }
   }
 
-  // 극장 메타데이터 및 코멘트 렌더링
+  // 극장 메타데이터 렌더링
   function updateTheaterMetadata(clip) {
     const rankMap = getGlobalRankMap();
     const rank = rankMap.get(clip.clipUID) || 1;
-    const { tags } = classifyClip(clip);
 
     el.nowPlayingRankBadge.textContent = `👑 인기 랭킹 #${rank} 재생 중`;
     el.activeClipTitle.textContent = clip.clipTitle;
@@ -573,16 +560,6 @@
     el.activeClipDuration.textContent = `${clip.duration || 0}초`;
     el.activeClipUid.textContent = clip.clipUID;
     el.btnOpenChzzkClip.href = `https://chzzk.naver.com/clips/${encodeURIComponent(clip.clipUID)}`;
-
-    // 태그 배지
-    el.activeClipTags.innerHTML = tags
-      .map(
-        (t) =>
-          `<span class="tag-badge ${t.type === 'hot' ? 'tag-hot' : t.type === 'chzzk' ? 'tag-chzzk' : ''}">${escapeHtml(
-            t.label
-          )}</span>`
-      )
-      .join('');
 
     // 북마크 상태
     const isBookmarked = state.bookmarks.includes(clip.clipUID);
